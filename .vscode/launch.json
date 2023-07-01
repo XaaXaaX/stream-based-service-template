@@ -1,0 +1,14 @@
+{
+  "configurations": [
+    {
+      "name": "Launch stream doc Validattion",
+      "type": "node",
+      "request": "launch",
+      "program": "${file}",
+      "console": "integratedTerminal",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+    }
+  ]
+}

@@ -1,0 +1,143 @@
+asyncapi: 2.6.0
+info:
+  version: 1.0.0
+  title: Service Name
+  description: Service that handles A Domain.
+
+servers:
+  Topic:
+    url: yourdomainname-sns-topic
+    protocol: HTTP
+
+channels:
+  OrderService:
+    servers:
+      - Topic
+    subscribe:
+      summary: Subscribe to receive notification events.
+      message:
+        oneOf:
+          - $ref: '#/components/messages/NotificationEvent'
+          - $ref: '#/components/messages/IntegrationEvent'
+          - $ref: '#/components/messages/DomainEvent'
+
+components:
+  messages:
+    IntegrationEvent:
+      name: Event
+      payload:
+        $ref: '#/components/schemas/IntegrationEvent'
+    NotificationEvent:
+      name: Event
+      payload:
+        $ref: '#/components/schemas/NotificationEvent'
+    DomainEvent:
+      name: Event
+      payload:
+        $ref: '#/components/schemas/DomainEvent'
+  schemas:
+    EventMetadata:
+      type: object
+      properties:
+        metadata:
+          type: object
+          required:
+            - YourEntityNameId
+            - state
+          properties:
+            YourEntityNameId:
+              type: string
+            state:
+              type: string
+              enum:
+              - YourEntityNameCreated
+              - YourEntityNameCanceled
+              - YourEntityNameRefused
+              - YourEntityNameRejected
+              - YourEntityNameConfirmed
+    EventDetails:
+      type: object
+      properties:
+        details:
+          type: object
+          required:
+            - YourEntityNamePropertyOne
+            - YourEntityNamePropertyTwo
+          properties:
+            YourEntityNamePropertyOne:
+              type: string
+            YourEntityNamePropertyTwo:
+              type: string
+    EventData:
+      allOf:
+        - $ref: '#/components/schemas/EventDetails'
+        - $ref: '#/components/schemas/EventMetadata'
+    NotificationEvent:
+      allOf:
+        - $ref: '#/components/schemas/Event'
+    IntegrationEvent:
+      allOf:
+        - $ref: '#/components/schemas/Event'
+        - type: object
+          required:
+            - data
+          properties: 
+            data:
+              required:
+                - metadata
+              $ref: '#/components/schemas/EventMetadata'
+    DomainEvent:
+      allOf:
+        - $ref: '#/components/schemas/Event'
+        - type: object
+          required:
+            - data
+          properties: 
+            data:
+              required:
+                - metadata
+                - details
+              $ref: '#/components/schemas/EventData'
+    Event:
+      type: object
+      required:
+      - specVersion
+      - scope
+      - eventType
+      - eventName
+      - idempotencyKey
+      - contentType
+      - ref
+      properties:
+        specVersion:
+          type: string
+        scope:
+          type: string
+        eventType:
+          type: string
+          enum:
+          - INSERT
+          - UPDATE
+          - DELETE
+        eventName:
+          type: string
+          enum:
+          - INTEGRATION
+          - DOMAIN
+          - NOTIFICATION
+          - DELTA
+          - CARRIED-STATE
+        idempotencyKey:
+          type: string
+        contentType:
+          type: string
+          enum:
+          - JSON
+          - AVRO
+          - PROTOBUF
+        ref:
+          type: string
+        dataVersion:
+          type: string
+        data:
+          type: object
